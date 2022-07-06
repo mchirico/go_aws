@@ -20,7 +20,7 @@ func Options() *string {
 	deleteBucket = flag.Bool("delete", false, "delete flag")
 	listBuckets = flag.Bool("list", false, "list buckets")
 	flag.Parse()
-	if *bucketPtr == "" && ! *listBuckets{
+	if *bucketPtr == "" && !*listBuckets {
 		log.Fatalf(`Need to enter a bucket name.
 	
 		 -bucket=bucketsample
@@ -29,7 +29,11 @@ func Options() *string {
 	return bucketPtr
 }
 
-func CreateBucket(cfg aws.Config, input *s3.CreateBucketInput) (*s3.CreateBucketOutput, error) {
+type Bucket struct {
+	Name *string
+}
+
+func (b *Bucket) createBucket(cfg aws.Config, input *s3.CreateBucketInput) (*s3.CreateBucketOutput, error) {
 	client := s3.NewFromConfig(cfg)
 	result, err := client.CreateBucket(context.TODO(), input)
 	if err != nil {
@@ -38,7 +42,7 @@ func CreateBucket(cfg aws.Config, input *s3.CreateBucketInput) (*s3.CreateBucket
 	return result, nil
 }
 
-func DeleteBucket(cfg aws.Config, input *s3.DeleteBucketInput) (*s3.DeleteBucketOutput, error) {
+func (b *Bucket) deleteBucket(cfg aws.Config, input *s3.DeleteBucketInput) (*s3.DeleteBucketOutput, error) {
 	client := s3.NewFromConfig(cfg)
 	result, err := client.DeleteBucket(context.TODO(), input)
 	if err != nil {
@@ -47,7 +51,7 @@ func DeleteBucket(cfg aws.Config, input *s3.DeleteBucketInput) (*s3.DeleteBucket
 	return result, nil
 }
 
-func ListBuckets(cfg aws.Config, input *s3.ListBucketsInput) (*s3.ListBucketsOutput, error) {
+func (b *Bucket) listBuckets(cfg aws.Config, input *s3.ListBucketsInput) (*s3.ListBucketsOutput, error) {
 	client := s3.NewFromConfig(cfg)
 	result, err := client.ListBuckets(context.TODO(), input)
 	if err != nil {
@@ -56,11 +60,11 @@ func ListBuckets(cfg aws.Config, input *s3.ListBucketsInput) (*s3.ListBucketsOut
 	return result, nil
 }
 
-func RunDelete(bucket *string) {
+func (b *Bucket) RunDelete() {
 	input := &s3.DeleteBucketInput{
-		Bucket: bucket,
+		Bucket: b.Name,
 	}
-	result, err := DeleteBucket(client.Config(), input)
+	result, err := b.deleteBucket(client.Config(), input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
@@ -68,40 +72,43 @@ func RunDelete(bucket *string) {
 	return
 }
 
-func RunCreate(bucket *string) {
+func (b *Bucket) RunCreate() {
 	input := &s3.CreateBucketInput{
-		Bucket: bucket,
+		Bucket: b.Name,
 	}
-	result, err := CreateBucket(client.Config(), input)
+	result, err := b.createBucket(client.Config(), input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 	fmt.Printf("result: %s", result)
 }
 
-func RunList() {
+func (b *Bucket) RunList() {
 	input := &s3.ListBucketsInput{}
-	result, err := ListBuckets(client.Config(), input)
+	result, err := b.listBuckets(client.Config(), input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
-	for _,v := range result.Buckets {
+	for _, v := range result.Buckets {
 
-		fmt.Printf("%s, \t\t%s\n", *v.Name,*v.CreationDate)
+		fmt.Printf("%s, \t\t%s\n", *v.Name, *v.CreationDate)
 	}
 }
 
-
+func NewBucket(name *string) *Bucket {
+	return &Bucket{Name: name}
+}
 
 func main() {
-	bucket := Options()
+	bucketName := Options()
+	b := NewBucket(bucketName)
 	if *deleteBucket {
-		RunDelete(bucket)
+		b.RunDelete()
 		return
 	}
 	if *listBuckets {
-		RunList()
+		b.RunList()
 		return
 	}
-	RunCreate(bucket)
+	b.RunCreate()
 }
