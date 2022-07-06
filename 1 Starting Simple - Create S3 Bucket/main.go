@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"lesson1/bucket"
+	"lesson1/client"
 	"log"
 )
 
@@ -28,12 +29,12 @@ func main() {
 	bucketName := Options()
 	b := bucket.NewBucket(bucketName)
 	if *deleteBucket {
-		b.RunDelete()
+		b.RunDelete(client.Config())
 		return
 	}
 	if *listBuckets {
-		b.RunList()
+		b.RunList(client.Config())
 		return
 	}
-	b.RunCreate()
+	b.RunCreate(client.Config())
 }

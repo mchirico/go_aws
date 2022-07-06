@@ -2,9 +2,7 @@ package bucket
 
 import (
 	"context"
-
 	"fmt"
-	"lesson1/client"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -47,11 +45,11 @@ func (b *Bucket) listBuckets(cfg aws.Config, input *s3.ListBucketsInput) (*s3.Li
 	return result, nil
 }
 
-func (b *Bucket) RunDelete() {
+func (b *Bucket) RunDelete(cfg aws.Config) {
 	input := &s3.DeleteBucketInput{
 		Bucket: b.Name,
 	}
-	result, err := b.deleteBucket(client.Config(), input)
+	result, err := b.deleteBucket(cfg, input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
@@ -59,20 +57,20 @@ func (b *Bucket) RunDelete() {
 	return
 }
 
-func (b *Bucket) RunCreate() {
+func (b *Bucket) RunCreate(cfg aws.Config) {
 	input := &s3.CreateBucketInput{
 		Bucket: b.Name,
 	}
-	result, err := b.createBucket(client.Config(), input)
+	result, err := b.createBucket(cfg, input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
 	fmt.Printf("result: %s", result)
 }
 
-func (b *Bucket) RunList() {
+func (b *Bucket) RunList(cfg aws.Config) {
 	input := &s3.ListBucketsInput{}
-	result, err := b.listBuckets(client.Config(), input)
+	result, err := b.listBuckets(cfg, input)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
