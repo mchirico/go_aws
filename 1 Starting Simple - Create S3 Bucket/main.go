@@ -1,40 +1,22 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package main
 
-import (
-	"flag"
-
-	"lesson1/bucket"
-	"lesson1/client"
-	"log"
-)
-
-var deleteBucket *bool
-var listBuckets *bool
-
-func Options() *string {
-	bucketPtr := flag.String("bucket", "", "unique bucket name")
-	deleteBucket = flag.Bool("delete", false, "delete flag")
-	listBuckets = flag.Bool("list", false, "list buckets")
-	flag.Parse()
-	if *bucketPtr == "" && !*listBuckets {
-		log.Fatalf(`Need to enter a bucket name.
-	
-		 -bucket=bucketsample or -list
-	`)
-	}
-	return bucketPtr
-}
+import "lesson1/cmd"
 
 func main() {
-	bucketName := Options()
-	b := bucket.NewBucket(bucketName)
-	if *deleteBucket {
-		b.RunDelete(client.Config())
-		return
-	}
-	if *listBuckets {
-		b.RunList(client.Config())
-		return
-	}
-	b.RunCreate(client.Config())
+	cmd.Execute()
 }

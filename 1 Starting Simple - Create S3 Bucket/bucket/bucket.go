@@ -14,8 +14,15 @@ type Bucket struct {
 	Name *string
 }
 
-func NewBucket(name *string) *Bucket {
-	return &Bucket{Name: name}
+func NewBucket(name ...string) *Bucket {
+	if len(name) >= 1 {
+		return &Bucket{Name: &name[0]}
+	}
+	return &Bucket{}
+}
+
+func (b *Bucket) SetName(name string) {
+	b.Name = &name
 }
 
 func (b *Bucket) createBucket(cfg aws.Config, input *s3.CreateBucketInput) (*s3.CreateBucketOutput, error) {
@@ -45,7 +52,7 @@ func (b *Bucket) listBuckets(cfg aws.Config, input *s3.ListBucketsInput) (*s3.Li
 	return result, nil
 }
 
-func (b *Bucket) RunDelete(cfg aws.Config) {
+func (b *Bucket) RunDelete(cfg aws.Config) *s3.DeleteBucketOutput {
 	input := &s3.DeleteBucketInput{
 		Bucket: b.Name,
 	}
@@ -53,8 +60,7 @@ func (b *Bucket) RunDelete(cfg aws.Config) {
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
-	fmt.Println(result)
-	return
+	return result
 }
 
 func (b *Bucket) RunCreate(cfg aws.Config) {
@@ -65,7 +71,7 @@ func (b *Bucket) RunCreate(cfg aws.Config) {
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
-	fmt.Printf("result: %s", result)
+	fmt.Printf("result: %v", result)
 }
 
 func (b *Bucket) RunList(cfg aws.Config) {
